@@ -53,9 +53,8 @@ manipulate_raw_data <-function(data, activity_data, subject_data) {
 
     data_final<-cbind(subject_data, with_activity)
 
-    # @TODO do some processing on the feature names to change
-    # tBodyAcc-mean()-X to 'Mean Body Accel (x)' for example
-    out_features<-sapply(feature_names$V2, gsub, pattern="[,()]", replacement="")
+    # strip out parens right next to each other (eg: mean() -> mean)
+    out_features<-sapply(feature_names$V2, gsub, pattern="\\(\\)", replacement="")
     colnames(data_final)<-c("subject", "activity", out_features, recursive=T)
 
     data_final
@@ -83,30 +82,32 @@ test_final<-manipulate_raw_data(test, test_act, subjects)
 train_final<-manipulate_raw_data(train, train_act, train_subjects)
 
 # combine training and test into single data frame
-out<-rbind(train_final, test_final)
+combined<-rbind(train_final, test_final)
 
 # Final data frame will have one observation for each combination of 
 # unique subject identifier and activity.  Looks like 180 rows (30 x 6).
-#final<-out %>% group_by(subject, activity) %>% summarize_all(mean)
 
 # Tried several other approaches that all _failed_ and are noted here to I 
 # will in the future figure out why.
-#
+
 # This one will apply mean to activity and subject columns as well...
-# z<-ddply(out, .(activity, subject), summarize_all, mean)
-#
+# z<-ddply(combined, .(activity, subject), summarize_all, mean)
+
 # Here try to use is.numeric test before calc mean for column but, it
 # throws an error b/c of "bad" characters in the col name (eg: , or ())
-# z<-ddply(out, .(activity, subject), summarize_if, is.numeric, mean)
-#
+# z<-ddply(combined, .(activity, subject), summarize_if, is.numeric, mean)
+
 # Also throws error for same reason as above:
-# z<-ddply(out, .(activity, subject), summarize_at, 3:88, mean)
+# z<-ddply(combined, .(activity, subject), summarize_at, 3:88, mean)
 
 # numcolwise will only apply to numeric columns and _doesn't_ choke
 # like my attempts to use summarize_if or summarize_at
-z<-ddply(out, .(activity, subject), numcolwise(mean))
+final<-ddply(combined, .(activity, subject), numcolwise(mean))
 
-copy<-names(z)
-# the names are wrong, prepend mean to each:
-mean_prepend<-paste0("mean-", names(z)[3:88])
-colnames(z)<-c(copy[1:2], mean_prepend, recursive=T)
+
+# Alter names of columns b/c they are now "mean of" whatever it was
+# called before.
+# set asside col names we don't want to alter
+unaltered_column_names<-names(final)[1:2]
+mean_prepend_column_names<-paste0("mean-", names(final)[3:88])
+colnames(final)<-c(unaltered_column_names, mean_prepend_column_names, recursive=T)
