@@ -106,3 +106,6 @@ final<-ddply(combined, .(activity, subject), numcolwise(mean))
 unaltered_column_names<-names(final)[1:2]
 mean_prepend_column_names<-paste0("mean-", names(final)[3:88])
 colnames(final)<-c(unaltered_column_names, mean_prepend_column_names, recursive=T)
+
+# write tidy data to text file
+write.table(final, 'tidy-data.txt', row.names=F)

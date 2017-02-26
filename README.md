@@ -11,5 +11,7 @@ to be in a particular directory.
 
 Start interactive R session then source("run_analysis.R").
 
-The tidy data is called "combined".
+The tidy data created from the raw data is a variable called "combined".
 The summarized data frame is called "final".
+
+A text file containing the summarized data called "tidy-data.txt" is created.

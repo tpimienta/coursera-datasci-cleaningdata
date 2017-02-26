@@ -40,3 +40,5 @@ The function manipulate\_raw\_data() encapsulates the processing for the test an
 ## Summaries
 
 The tidy data generated was summarized by taking the mean for each measurement.  Column names were prepended with the text "mean-" to indicate the variables were now means of the original variables.  The summarized data frame is called "final".
+
+The summarized data is written to "tidy-data.txt".
