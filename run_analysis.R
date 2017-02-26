@@ -1,3 +1,5 @@
+# Cleaning Data Week 4 Peer Reviewed Assignment
+
 library(plyr)
 library(dplyr)
 
@@ -44,7 +46,7 @@ manipulate_raw_data <-function(data, activity_data, subject_data) {
 
     # fix names on the data frame 
     # here using logical vector gives desired result
-    feature_names<-filter(features, grepl("mean|std", features$V2, ignore.case=T))
+    feature_names<-filter(features, logical_idx_of_mean_and_std)
     # @TODO do some processing on the feature names to change
     # tBodyAcc-mean()-X to 'Mean Body Accel (x)' for example
     colnames(data_final)<-c("subject", "activity", feature_names$V2, recursive=T)
