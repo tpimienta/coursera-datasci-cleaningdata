@@ -2,7 +2,6 @@
 
 library(plyr)
 library(dplyr)
-library(data.table)
 
 # information that is common to processing both training and test data sets
 
@@ -56,7 +55,8 @@ manipulate_raw_data <-function(data, activity_data, subject_data) {
 
     # @TODO do some processing on the feature names to change
     # tBodyAcc-mean()-X to 'Mean Body Accel (x)' for example
-    colnames(data_final)<-c("subject", "activity", feature_names$V2, recursive=T)
+    out_features<-sapply(feature_names$V2, gsub, pattern="[,()]", replacement="")
+    colnames(data_final)<-c("subject", "activity", out_features, recursive=T)
 
     data_final
 }
@@ -89,11 +89,24 @@ out<-rbind(train_final, test_final)
 # unique subject identifier and activity.  Looks like 180 rows (30 x 6).
 #final<-out %>% group_by(subject, activity) %>% summarize_all(mean)
 
-# alternate but doesn't work!
-#g<-group_by(out, activity, subject)
-z<-ddply(out, c("activity", "subject"), summarize_if, is.numeric, mean)
+# Tried several other approaches that all _failed_ and are noted here to I 
+# will in the future figure out why.
+#
+# This one will apply mean to activity and subject columns as well...
+# z<-ddply(out, .(activity, subject), summarize_all, mean)
+#
+# Here try to use is.numeric test before calc mean for column but, it
+# throws an error b/c of "bad" characters in the col name (eg: , or ())
+# z<-ddply(out, .(activity, subject), summarize_if, is.numeric, mean)
+#
+# Also throws error for same reason as above:
+# z<-ddply(out, .(activity, subject), summarize_at, 3:88, mean)
 
-# we picked up lots of other classes along the way, I like output of data.frame
-#final<-as.data.frame(final)
+# numcolwise will only apply to numeric columns and _doesn't_ choke
+# like my attempts to use summarize_if or summarize_at
+z<-ddply(out, .(activity, subject), numcolwise(mean))
 
+copy<-names(z)
 # the names are wrong, prepend mean to each:
+mean_prepend<-paste0("mean-", names(z)[3:88])
+colnames(z)<-c(copy[1:2], mean_prepend, recursive=T)
