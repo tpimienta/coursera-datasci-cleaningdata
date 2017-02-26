@@ -24,8 +24,8 @@ feature_names<-filter(features, logical_idx_of_mean_and_std)
 #    gsub("^t|\-", '', x)
 #})
 
-# labels for the activities
-act_label<-fread('uci/activity_labels.txt')
+# labels for the activities, we want factors, not character vectors!
+act_label<-fread('uci/activity_labels.txt', stringsAsFactors=T)
 
 # The processing for both test and train data will be the same so
 # compose a function to do those tasks.  Function will make use of the
