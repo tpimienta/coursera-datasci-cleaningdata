@@ -18,11 +18,6 @@ logical_idx_of_mean_and_std<-grepl("mean|std", features$V2, ignore.case=T)
 # here using logical vector gives desired result
 feature_names<-filter(features, logical_idx_of_mean_and_std)
 
-# give features better names
-#features_<-sapply(feature_names$V2, function(x) {
-#    gsub("^t|\-", '', x)
-#})
-
 # labels for the activities, we want factors, not character vectors!
 act_label<-read.table('uci/activity_labels.txt', stringsAsFactors=T)
 
