@@ -87,8 +87,13 @@ out<-rbind(train_final, test_final)
 
 # Final data frame will have one observation for each combination of 
 # unique subject identifier and activity.  Looks like 180 rows (30 x 6).
-final<-out %>% group_by(subject, activity) %>% summarize_all(mean)
+#final<-out %>% group_by(subject, activity) %>% summarize_all(mean)
+
+# alternate but doesn't work!
+#g<-group_by(out, activity, subject)
+z<-ddply(out, c("activity", "subject"), summarize_if, is.numeric, mean)
+
 # we picked up lots of other classes along the way, I like output of data.frame
-final<-as.data.frame(final)
+#final<-as.data.frame(final)
 
 # the names are wrong, prepend mean to each:
