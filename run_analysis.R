@@ -1,9 +1,8 @@
 library(plyr)
 library(dplyr)
 
-# process train, process test, combine using rbind()
+# information that is common to processing both training and test data sets
 
-# common
 # the  variables represented in each column of the data frames
 features <- read.table('uci/features.txt', comment.char='', stringsAsFactors=F)
 
@@ -16,21 +15,32 @@ logical_idx_of_mean_and_std<-grepl("mean|std", features$V2, ignore.case=T)
 # labels for the activities
 act_label<-read.table('uci/activity_labels.txt')
 
+# The processing for both test and train data will be the same so
+# compose a function to do those tasks.  Function will make use of the
+# global variables initialized above.
 
-# processing
-# files: the data, the activities for the data, the subjects
-
-
-
-manipulate_raw_data <-function(data, test_act, subjects) {
+manipulate_raw_data <-function(data, activity_data, subject_data) {
+    # Processes the data to:
+    # - extracts only mean and std variables from the data
+    # - add activity variable to each observation
+    # - add subject to each observation
+    # 
+    # @param data.frame data 
+    #   the original raw data
+    # @param data.frame activity_data
+    #   the activity data
+    # @param data.frame subject_data
+    #   the subject data
+    #
+    # @return data.frame
     data<-select(data, idx_of_mean_and_std)
     # match activity label to observation index
-    test_labels<-join(test_act, act_label)
+    labels<-join(activity_data, act_label)
 
     # add activity variable to data frame
-    test_with_activity<-cbind(test_labels$V2, data)
+    with_activity<-cbind(labels$V2, data)
 
-    data_final<-cbind(subjects, test_with_activity)
+    data_final<-cbind(subject_data, with_activity)
 
     # fix names on the data frame 
     # here using logical vector gives desired result
@@ -48,13 +58,13 @@ test<-read.table('uci/test/X_test.txt', comment.char='')
 # each row in test data frame is for these activities
 test_act<-read.table('uci/test/y_test.txt')
 
-# subject variable 
+# subject variable for each observation
 subjects<-read.table('uci/test/subject_test.txt')
 
-# raw test data frame
+# raw training data frame
 train<-read.table('uci/train/X_train.txt', comment.char='')
 
-# each row in test data frame is for these activities
+# each row in training data frame is for these activities
 train_act<-read.table('uci/train/y_train.txt')
 
 # subject variable 
@@ -62,4 +72,6 @@ train_subjects<-read.table('uci/train/subject_train.txt')
 
 test_final<-manipulate_raw_data(test, test_act, subjects)
 train_final<-manipulate_raw_data(train, train_act, train_subjects)
+
+# combine training and test into single data frame
 out<-rbind(train_final, test_final)
